@@ -1,6 +1,6 @@
 # Dev.Finance$
 
-<img alt="DevFinances" title="DevFinances" src="https://raw.githubusercontent.com/Luiz091/DevFinances/main/assets/dev_finances.JPG"/>
+<img alt="DevFinances" title="DevFinances" src="https://raw.githubusercontent.com/LuizAlves01/DevFinances/main/assets/dev_finances.JPG"/>
 
 ### _Maratona Discover Rocketseat_ 
 
