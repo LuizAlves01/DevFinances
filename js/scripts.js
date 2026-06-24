@@ -1,18 +1,27 @@
 const Modal = {
-    open() {
-        // Abrir modal & Adicionar a class active
+    open(editIndex = null) {
         document
             .querySelector('.modal-overlay')
             .classList
             .add('active')
 
+        if (editIndex !== null) {
+            Form.setValues(Transaction.all[editIndex])
+            Form.editIndex = editIndex
+            document.querySelector('#form h2').innerText = "Editar Transação"
+        } else {
+            Form.clearFields()
+            document.querySelector('#form h2').innerText = "Nova Transação"
+        }
     },
     close() {
-        // fechar o modal & remover a class active
         document
             .querySelector('.modal-overlay')
             .classList
             .remove('active')
+
+        Form.clearFields()
+        Form.editIndex = null
     }
 }
 
@@ -33,6 +42,16 @@ const Transaction = {
         Transaction.all.push(transaction)
 
         App.reload()
+    },
+
+    update(index, transaction) {
+        Transaction.all[index] = transaction
+
+        App.reload()
+    },
+
+    edit(index) {
+        Modal.open(index)
     },
 
     remove(index) {
@@ -87,7 +106,8 @@ const DOM = {
         <td class="description">${transaction.description}</td>
         <td class="${CSSclass}">${amount}</td>
         <td class="date">${transaction.date}</td>
-        <td>
+        <td class="actions">
+            <a href="#" onclick="Transaction.edit(${index}); return false;">Editar</a>
             <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
         </td>
         `
@@ -105,6 +125,18 @@ const DOM = {
         document
             .getElementById('totalDisplay')
             .innerHTML = Utils.formatCurrency(Transaction.total())
+
+        DOM.toggleWarning(Transaction.total())
+    },
+
+    toggleWarning(total) {
+        const warning = document.getElementById('warning')
+
+        if (total < 0) {
+            warning.classList.remove('hidden')
+        } else {
+            warning.classList.add('hidden')
+        }
     },
 
     clearTransactions() {
@@ -144,6 +176,7 @@ const Form = {
     description: document.querySelector('input#description'),
     amount: document.querySelector('input#amount'),
     date: document.querySelector('input#date'),
+    editIndex: null,
 
     getValues() {
         return {
@@ -181,6 +214,13 @@ const Form = {
         Form.description.value = ""
         Form.amount.value = ""
         Form.date.value = ""
+        Form.editIndex = null
+    },
+
+    setValues(transaction) {
+        Form.description.value = transaction.description
+        Form.amount.value = transaction.amount / 100
+        Form.date.value = transaction.date.split("/").reverse().join("-")
     },
 
     submit(event) {
@@ -189,7 +229,13 @@ const Form = {
         try {
             Form.validateFields()
             const transaction = Form.formatValues()
-            Transaction.add(transaction)
+
+            if (Form.editIndex !== null) {
+                Transaction.update(Form.editIndex, transaction)
+            } else {
+                Transaction.add(transaction)
+            }
+
             Form.clearFields()
             Modal.close()
         } catch (error) {
